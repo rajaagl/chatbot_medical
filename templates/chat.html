@@ -1,81 +1,297 @@
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
 <!DOCTYPE html>
-<html>
-	<head>
-		<title>Chatbot</title>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}"/>
-	</head>
-	
-	
-	<body>
-		<div class="container-fluid h-100">
-			<div class="row justify-content-center h-100">		
-				<div class="col-md-8 col-xl-6 chat">
-					<div class="card">
-						<div class="card-header msg_head">
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-									<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img">
-									<!-- <img src="https://www.prdistribution.com/spirit/uploads/pressreleases/2019/newsreleases/d83341deb75c4c4f6b113f27b1e42cd8-chatbot-florence-already-helps-thousands-of-patients-to-remember-their-medication.png" class="rounded-circle user_img"> -->
-									<span class="online_icon"></span>
-								</div>
-								<div class="user_info">
-									<span>Medical Chatbot</span>
-									<p>Ask me anything!</p>
-								</div>
-							</div>
-						</div>
-						<div id="messageFormeight" class="card-body msg_card_body">
-							
-							
-						</div>
-						<div class="card-footer">
-							<form id="messageArea" class="input-group">
-                                <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
-								<div class="input-group-append">
-									<button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<script>
-			$(document).ready(function() {
-				$("#messageArea").on("submit", function(event) {
-					const date = new Date();
-					const hour = date.getHours();
-					const minute = date.getMinutes();
-					const str_time = hour+":"+minute;
-					var rawText = $("#text").val();
-
-					var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + rawText + '<span class="msg_time_send">'+ str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
-					
-					$("#text").val("");
-					$("#messageFormeight").append(userHtml);
-
-					$.ajax({
-						data: {
-							msg: rawText,	
-						},
-						type: "POST",
-						url: "/get",
-					}).done(function(data) {
-						var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + data + '<span class="msg_time">' + str_time + '</span></div></div>';
-						$("#messageFormeight").append($.parseHTML(botHtml));
-					});
-					event.preventDefault();
-				});
-			});
-		</script>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant médical</title>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    
+    <!-- Votre CSS personnalisé -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
         
-    </body>
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        .animate-slideIn { animation: slideIn 0.3s ease-out; }
+        .animate-bounce { animation: bounce 1.4s infinite; }
+        
+        /* Scrollbar personnalisée avec les nouvelles couleurs */
+        #messageFormeight::-webkit-scrollbar { width: 6px; }
+        #messageFormeight::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        #messageFormeight::-webkit-scrollbar-thumb { background: #00CDB7; border-radius: 10px; }
+        #messageFormeight::-webkit-scrollbar-thumb:hover { background: #0F2D4A; }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto h-screen flex items-center justify-center">
+        <div class="w-full max-w-2xl">
+            <!-- Header de la page -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Assistant Médical </h1>
+                <p class="text-gray-500 mt-2">Posez vos questions et obtenez des réponses instantanées.</p>
+            </div>
+            
+            <!-- Carte de chat -->
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+                <!-- Header du chat avec la couleur #00CDB7 -->
+                <div class="p-4 flex items-center space-x-3" style="background-color: #00CDB7;">
+                    <div class="relative">
+                        <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" 
+                             alt="Bot" 
+                             class="w-12 h-12 rounded-full border-2 border-white object-cover">
+                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-white text-lg">Votre assistant médical</h3>
+                        <p class="text-xs text-white opacity-90 flex items-center">
+                            En ligne
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Zone des messages -->
+                <div id="messageFormeight" class="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                    <!-- Les messages seront insérés ici par jQuery -->
+                </div>
+
+                <!-- Footer avec input -->
+                <div class="p-4 border-t bg-white">
+                    <form id="messageArea" class="flex items-center space-x-2">
+                        <input type="text" 
+                               id="text" 
+                               name="msg" 
+                               placeholder="Écrivez votre message..." 
+                               autocomplete="off" 
+                               class="flex-1 p-3 border rounded-xl focus:outline-none focus:ring-2 transition-all"
+                               style="border-color: #00CDB7;"
+                               required>
+                        <button type="submit" 
+                                id="send" 
+                                class="p-3 text-white rounded-xl transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                style="background-color: #00CDB7;">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    <p class="text-xs text-gray-400 mt-2 text-center">
+                        Assistant médical intelligent
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Message de bienvenue
+            const welcomeTime = getCurrentTime();
+            const welcomeHtml = '<div class="flex justify-start mb-4 animate-slideIn">' +
+                '<div class="flex items-end space-x-2">' +
+                '<div class="flex-shrink-0">' +
+                '<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="w-8 h-8 rounded-full object-cover">' +
+                '</div>' +
+                '<div class="relative p-3 bg-white border rounded-2xl rounded-bl-none max-w-[80%]" style="border-color: #00CDB7;">' +
+                '<p class="text-sm">Bonjour ! Je suis votre assistant médical. Comment puis-je vous aider ?</p>' +
+                '<div class="flex items-center justify-end space-x-1 mt-1 text-gray-400">' +
+                '<i class="fas fa-clock text-xs"></i>' +
+                '<span class="text-xs">' + welcomeTime + '</span>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+            
+            $("#messageFormeight").append(welcomeHtml);
+
+            // Suggestions rapides
+            /*
+            const suggestions = [
+                { text: "Prendre rendez-vous", icon: "📅" },
+                { text: "Horaires d'ouverture", icon: "🕒" },
+                { text: "Tarifs", icon: "💰" },
+                { text: "حجز موعد", icon: "📅" },
+                { text: "ساعات العمل", icon: "🕒" }
+            ];
+
+            let suggestionsHtml = '<div class="p-4 bg-gray-50 border-b mb-4">' +
+                '<p class="text-xs text-gray-500 mb-2">Suggestions :</p>' +
+                '<div class="flex flex-wrap gap-2">';
+            
+            suggestions.forEach(sugg => {
+                suggestionsHtml += '<button class="suggestion-btn px-3 py-2 text-sm bg-white border rounded-full hover:bg-gray-50 transition-all hover:scale-105" style="border-color: #00CDB7;" data-text="' + sugg.text + '">' +
+                    '<span class="mr-1">' + sugg.icon + '</span>' +
+                    sugg.text +
+                    '</button>';
+            });
+            
+            suggestionsHtml += '</div></div>';
+            
+            // Insérer les suggestions après le message de bienvenue
+            $("#messageFormeight").append(suggestionsHtml);
+
+            // Gestionnaire pour les suggestions
+            $(document).on('click', '.suggestion-btn', function() {
+                $("#text").val($(this).data('text'));
+                $("#messageArea").submit();
+            });
+            */
+           // Dans votre liste de suggestions
+const suggestions = [
+    { 
+        text: "Prendre rendez-vous", 
+        icon: "📅",
+        response: "📅 https://votre-site.com/rendez-vous"
+    },
+    { 
+        text: "💰 Tous les tarifs", 
+        icon: "💰",
+        keywords: "tarifs",
+        // Le bouton va juste envoyer "tarifs" au backend
+        action: "send"
+    },
+    { 
+        text: "👨‍⚕️ Nos médecins", 
+        icon: "👨‍⚕️",
+        response: "👨‍⚕️ https://votre-site.com/medecins"
+    },
+    { 
+        text: "حجز موعد", 
+        icon: "📅",
+        response: "📅 https://votre-site.com/rendez-vous"
+    },
+    { 
+        text: "📍 Adresse", 
+        icon: "📍",
+        response: "📍 123 Rue de la Liberté, Casablanca"
+    }
+];
+
+// Gestionnaire pour les suggestions
+$(document).on('click', '.suggestion-btn', function() {
+    const suggestionText = $(this).data('text');
+    
+    // Afficher le message utilisateur
+    displayUserMessage(suggestionText);
+    
+    // Envoyer à l'API
+    $.ajax({
+        type: "POST",
+        url: "/get",
+        data: { msg: suggestionText },
+        success: function(data) {
+            displayBotMessage(data);
+        }
+    });
+});
+            function getCurrentTime() {
+                const date = new Date();
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                return hours + ":" + minutes;
+            }
+
+            $("#messageArea").on("submit", function(event) {
+                event.preventDefault();
+                
+                const currentTime = getCurrentTime();
+                const rawText = $("#text").val().trim();
+                
+                if (!rawText) return;
+
+                // Message utilisateur avec la couleur #00CDB7
+                const userHtml = '<div class="flex justify-end mb-4 animate-slideIn">' +
+                    '<div class="flex items-end space-x-2 flex-row-reverse">' +
+                    '<div class="flex-shrink-0">' +
+                    '<img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="w-8 h-8 rounded-full object-cover">' +
+                    '</div>' +
+                    '<div class="relative p-3 text-white rounded-2xl rounded-br-none max-w-[80%]" style="background-color: #00CDB7;">' +
+                    '<p class="text-sm">' + rawText + '</p>' +
+                    '<div class="flex items-center justify-end space-x-1 mt-1 text-white/70">' +
+                    '<i class="fas fa-clock text-xs"></i>' +
+                    '<span class="text-xs">' + currentTime + '</span>' +
+                    '</div>' +
+                    '<div class="absolute bottom-0 right-0 translate-x-1/2 w-3 h-3" style="background-color: #00CDB7; clip-path: polygon(0 0, 100% 0, 0 100%);"></div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+
+                $("#messageFormeight").append(userHtml);
+                $("#text").val("");
+                
+                // Scroll vers le bas
+                $("#messageFormeight").scrollTop($("#messageFormeight")[0].scrollHeight);
+
+                // Appel AJAX à votre API
+                $.ajax({
+                    type: "POST",
+                    url: "/get",
+                    data: { msg: rawText },
+                    success: function(data) {
+                        const botHtml = '<div class="flex justify-start mb-4 animate-slideIn">' +
+                            '<div class="flex items-end space-x-2">' +
+                            '<div class="flex-shrink-0">' +
+                            '<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="w-8 h-8 rounded-full object-cover">' +
+                            '</div>' +
+                            '<div class="relative p-3 bg-white border rounded-2xl rounded-bl-none max-w-[80%]" style="border-color: #00CDB7;">' +
+                            '<p class="text-sm">' + data + '</p>' +
+                            '<div class="flex items-center justify-end space-x-1 mt-1 text-gray-400">' +
+                            '<i class="fas fa-clock text-xs"></i>' +
+                            '<span class="text-xs">' + currentTime + '</span>' +
+                            '</div>' +
+                            '<div class="absolute bottom-0 left-0 -translate-x-1/2 w-3 h-3 bg-white" style="clip-path: polygon(100% 0, 0 0, 100% 100%);"></div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+                        
+                        $("#messageFormeight").append(botHtml);
+                        $("#messageFormeight").scrollTop($("#messageFormeight")[0].scrollHeight);
+                    },
+                    error: function() {
+                        const errorHtml = '<div class="flex justify-start mb-4">' +
+                            '<div class="flex items-end space-x-2">' +
+                            '<div class="flex-shrink-0">' +
+                            '<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="w-8 h-8 rounded-full object-cover">' +
+                            '</div>' +
+                            '<div class="relative p-3 bg-red-50 border border-red-200 rounded-2xl rounded-bl-none max-w-[80%]">' +
+                            '<p class="text-sm text-red-600">Désolé, une erreur de connexion est survenue.</p>' +
+                            '<div class="flex items-center justify-end space-x-1 mt-1 text-gray-400">' +
+                            '<i class="fas fa-clock text-xs"></i>' +
+                            '<span class="text-xs">' + currentTime + '</span>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+                        
+                        $("#messageFormeight").append(errorHtml);
+                        $("#messageFormeight").scrollTop($("#messageFormeight")[0].scrollHeight);
+                    }
+                });
+            });
+
+            // Gestionnaire pour la touche Entrée
+            $("#text").keypress(function(e) {
+                if (e.which == 13 && !e.shiftKey) {
+                    e.preventDefault();
+                    $("#messageArea").submit();
+                }
+            });
+        });
+    </script>
+</body>
 </html>
