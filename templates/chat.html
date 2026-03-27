@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assistant médical</title>
     
+<!-- Favicon / Icône de l'onglet -->
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/387/387569.png" type="image/png">
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/387/387569.png" type="image/png">
+
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -94,6 +98,38 @@
             </div>
         </div>
     </div>
+    <style>
+        
+     /* Styles pour les suggestions */
+.suggestion-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+.suggestion-card:hover {
+    transform: translateX(3px);
+}
+
+/* Animation d'entrée pour les suggestions */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.suggestion-card {
+    animation: fadeInUp 0.5s ease-out forwards;
+    animation-delay: calc(var(--index) * 0.1s);
+    opacity: 0;
+}
+    </style>
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -151,7 +187,123 @@
                 $("#messageArea").submit();
             });
             */
-           // Dans votre liste de suggestions
+
+
+                        // ============================================
+            // SUGGESTIONS CLIQUABLES (COMME DANS LA CAPTURE)
+            // ============================================
+            
+            const suggestions = [
+                { 
+                    text: "Accueil", 
+                    icon: "🏠",
+                    desc: "Retour à la page d'accueil",
+                    url: "/",
+                    color: "emerald"
+                },
+                { 
+                    text: "Nos médecins", 
+                    icon: "👨‍⚕️",
+                    desc: "Liste de tous nos praticiens",
+                    url: "/medecins",
+                    color: "blue"
+                },
+                { 
+                    text: "Rendez-vous", 
+                    icon: "📅",
+                    desc: "Prenez rendez-vous en ligne",
+                    url: "/rendez-vous",
+                    color: "purple"
+                },
+                { 
+                    text: "Tarifs", 
+                    icon: "💰",
+                    desc: "Consultez nos grilles tarifaires",
+                    url: "/tarifs",
+                    color: "yellow"
+                },
+                { 
+                    text: "Contact", 
+                    icon: "📞",
+                    desc: "Comment nous contacter",
+                    url: "/contact",
+                    color: "red"
+                },
+                { 
+                    text: "Mon compte", 
+                    icon: "👤",
+                    desc: "Gérez votre profil",
+                    url: "/compte",
+                    color: "indigo"
+                }
+            ];
+
+            // Fonction pour obtenir la classe de couleur
+            function getColorClasses(color) {
+                const colors = {
+                    emerald: { bg: 'bg-emerald-100', text: 'text-emerald-500', hover: 'hover:bg-emerald-500' },
+                    blue: { bg: 'bg-blue-100', text: 'text-blue-500', hover: 'hover:bg-blue-500' },
+                    purple: { bg: 'bg-purple-100', text: 'text-purple-500', hover: 'hover:bg-purple-500' },
+                    yellow: { bg: 'bg-yellow-100', text: 'text-yellow-500', hover: 'hover:bg-yellow-500' },
+                    red: { bg: 'bg-red-100', text: 'text-red-500', hover: 'hover:bg-red-500' },
+                    indigo: { bg: 'bg-indigo-100', text: 'text-indigo-500', hover: 'hover:bg-indigo-500' }
+                };
+                return colors[color] || colors.emerald;
+            }
+
+            // Créer le HTML des suggestions
+            let suggestionsHtml = `
+                <div class="p-4 bg-gray-50 border-b mb-4">
+                    <p class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-compass text-emerald-500 mr-2"></i>
+                        Que souhaitez-vous voir ?
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            `;
+            
+            suggestions.forEach(sugg => {
+                const colors = getColorClasses(sugg.color);
+                suggestionsHtml += `
+                    <a href="${sugg.url}" 
+                       class="suggestion-card group flex items-start space-x-3 p-3 bg-white border-2 border-gray-100 rounded-xl hover:shadow-md transition-all hover:border-${sugg.color}-200 hover:translate-x-1">
+                        <div class="${colors.bg} p-2 rounded-lg group-hover:${colors.hover} transition-colors">
+                            <i class="fas ${getIconClass(sugg.icon)} ${colors.text} text-lg group-hover:text-white transition-colors"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-medium text-gray-800">${sugg.text}</h4>
+                            <p class="text-xs text-gray-500">${sugg.desc}</p>
+                        </div>
+                        <i class="fas fa-arrow-right ${colors.text} opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </a>
+                `;
+            });
+            
+            suggestionsHtml += `
+                    </div>
+                </div>
+            `;
+
+            // Fonction pour convertir les émojis en classes Font Awesome
+            function getIconClass(emoji) {
+                const iconMap = {
+                    '🏠': 'fa-home',
+                    '👨‍⚕️': 'fa-user-md',
+                    '📅': 'fa-calendar-check',
+                    '💰': 'fa-coins',
+                    '📞': 'fa-phone-alt',
+                    '👤': 'fa-user-circle'
+                };
+                return iconMap[emoji] || 'fa-circle';
+            }
+
+            // Insérer les suggestions après le message de bienvenue
+            setTimeout(() => {
+                $("#messageFormeight").append(suggestionsHtml);
+            }, 500);
+
+
+
+         /*  // Dans votre liste de suggestions
 const suggestions = [
     { 
         text: "Prendre rendez-vous", 
@@ -198,7 +350,7 @@ $(document).on('click', '.suggestion-btn', function() {
             displayBotMessage(data);
         }
     });
-});
+});*/
             function getCurrentTime() {
                 const date = new Date();
                 const hours = date.getHours().toString().padStart(2, '0');

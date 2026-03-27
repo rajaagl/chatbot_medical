@@ -5,11 +5,13 @@ from dotenv import load_dotenv
 from src.prompt import *
 import os
 import csv
+from flask_cors import CORS  # ← AJOUTEZ CETTE LIGNE (1)
 from azure.ai.inference import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
 
 app = Flask(__name__)
+CORS(app)  # ← AJOUTEZ CETTE LIGNE (2) après app = Flask(__name__)
 load_dotenv()
 
 # ============================================
